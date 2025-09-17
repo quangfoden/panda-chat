@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐼 Panda Chat Room</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2d5016 0%, #5ba83b 50%, #2d5016 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+
+        .bamboo-pattern {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.1;
+            pointer-events: none;
+            background-image:
+                linear-gradient(90deg, #4a7c59 1px, transparent 1px),
+                linear-gradient(180deg, #4a7c59 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        .chat-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 500px;
+            height: 90vh;
+            max-height: 700px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid #2d5016;
+        }
+
+        .header {
+            background: linear-gradient(45deg, #000 0%, #333 50%, #000 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            border-radius: 17px 17px 0 0;
+        }
+
+        .panda-ears {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 60px;
+        }
+
+        .ear {
+            width: 30px;
+            height: 30px;
+            background: #000;
+            border-radius: 50%;
+            border: 3px solid white;
+        }
+
+        .panda-face {
+            font-size: 2.5em;
+            margin: 10px 0;
+        }
+
+        .header h1 {
+            font-size: 1.8em;
+            margin: 5px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .online-count {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        .login-screen {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            flex: 1;
+            padding: 40px 20px;
+            background: linear-gradient(45deg, #f0f8e8 0%, #e8f5d8 100%);
+        }
+
+        .login-panda {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            20%,
+            50%,
+            80%,
+            100% {
+                transform: translateY(0);
+            }
+
+            40% {
+                transform: translateY(-20px);
+            }
+
+            60% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            max-width: 300px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .login-form input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 3px solid #5ba83b;
+            border-radius: 25px;
+            font-size: 1.1em;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .login-form input:focus {
+            border-color: #2d5016;
+            box-shadow: 0 0 10px rgba(45, 80, 22, 0.3);
+        }
+
+        .login-btn {
+            background: linear-gradient(45deg, #5ba83b, #2d5016);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(45, 80, 22, 0.3);
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(45, 80, 22, 0.4);
+        }
+
+        .chat-main {
+            display: none;
+            flex: 1;
+            flex-direction: column;
+        }
+
+        .messages-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #f8fdf5, #f0f8e8);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 12px 15px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid #e8f5d8;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.own {
+            background: linear-gradient(135deg, #2d5016, #5ba83b);
+            color: white;
+            margin-left: 20px;
+            border-color: #2d5016;
+        }
+
+        .message-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #2d5016, #5ba83b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .message.own .message-avatar {
+            background: linear-gradient(45deg, #000, #333);
+        }
+
+        .message-content {
+            flex: 1;
+        }
+
+        .message-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .message-username {
+            font-weight: bold;
+            font-size: 0.9em;
+            color: #2d5016;
+        }
+
+        .message.own .message-username {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .message-time {
+            font-size: 0.8em;
+            opacity: 0.7;
+        }
+
+        .message-text {
+            font-size: 1em;
+            line-height: 1.4;
+            word-wrap: break-word;
+        }
+
+        .input-area {
+            padding: 20px;
+            background: linear-gradient(45deg, #2d5016, #5ba83b);
+            border-radius: 0 0 17px 17px;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            outline: none;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-input:focus {
+            background: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        .send-btn {
+            background: white;
+            color: #2d5016;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .typing-indicator {
+            padding: 10px 20px;
+            font-style: italic;
+            opacity: 0.7;
+            font-size: 0.9em;
+            color: #5ba83b;
+            display: none;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb {
+            background: #5ba83b;
+            border-radius: 10px;
+        }
+
+        .scrollbar-custom::-webkit-scrollbar-thumb:hover {
+            background: #2d5016;
+        }
+
+        @media (max-width: 600px) {
+            .chat-container {
+                width: 95%;
+                height: 95vh;
+                border-radius: 15px;
+            }
+
+            .header {
+                padding: 15px;
+                border-radius: 12px 12px 0 0;
+            }
+
+            .header h1 {
+                font-size: 1.5em;
+            }
+
+            .login-panda {
+                font-size: 4em;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bamboo-pattern"></div>
+
+    <div class="chat-container">
+        <div class="header">
+            <div class="panda-ears">
+                <div class="ear"></div>
+                <div class="ear"></div>
+            </div>
+            <div class="panda-face">🐼</div>
+            <h1>Panda Chat Room</h1>
+            <div class="online-count" id="onlineCount">🟢 Đang tải...</div>
+        </div>
+
+        <div class="login-screen" id="loginScreen">
+            <div class="login-panda">🐼</div>
+            <h2 style="color: #2d5016; margin-bottom: 20px;">Chào mừng bạn đến với Panda Chat!</h2>
+            <div class="login-form">
+                <div class="input-group">
+                    <input type="text" id="usernameInput" placeholder="Nhập tên của bạn..." maxlength="20">
+                </div>
+                <button class="login-btn" onclick="joinChat()">
+                    🐼 Tham gia chat
+                </button>
+            </div>
+        </div>
+
+        <div class="chat-main" id="chatMain">
+            <div class="messages-container scrollbar-custom" id="messagesContainer">
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                Ai đó đang gõ... 🐼
+            </div>
+
+            <div class="input-area">
+                <div class="input-container">
+                    <input type="text" class="message-input" id="messageInput" placeholder="Nhập tin nhắn..."
+                        maxlength="500">
+                    <button class="send-btn" onclick="sendMessage()">
+                        📤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-app-compat.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/firebase/9.23.0/firebase-database-compat.min.js"></script>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyATs7_dZVhtF5ODiV_cWVWLoPwMuNh6txk",
+            authDomain: "mangxahoi-b7499.firebaseapp.com",
+            databaseURL: "https://mangxahoi-b7499-default-rtdb.firebaseio.com",
+            projectId: "mangxahoi-b7499",
+            storageBucket: "mangxahoi-b7499.appspot.com",
+            messagingSenderId: "122651574808",
+            appId: "1:122651574808:web:89bee18e456692b8ecb96d",
+            measurementId: "G-V5JHB9DPEN"
+        };
+
+        // Khởi tạo Firebase
+        let app, database;
+        let currentUser = null;
+        let messagesRef = null;
+        let onlineUsersRef = null;
+        let isFirebaseConfigured = false;
+
+        function initFirebase() {
+            // Kiểm tra xem Firebase đã được cấu hình chưa
+            if (firebaseConfig.apiKey === "YOUR_API_KEY") {
+                console.warn("Firebase chưa được cấu hình. Sử dụng localStorage tạm thời.");
+                isFirebaseConfigured = false;
+                return;
+            }
+
+            try {
+                app = firebase.initializeApp(firebaseConfig);
+                database = firebase.database();
+                messagesRef = database.ref('messages');
+                onlineUsersRef = database.ref('onlineUsers');
+                isFirebaseConfigured = true;
+
+                // Lắng nghe tin nhắn mới
+                messagesRef.on('child_added', (snapshot) => {
+                    const message = snapshot.val();
+                    displayMessage(message);
+                });
+
+                // Lắng nghe người dùng online
+                onlineUsersRef.on('value', (snapshot) => {
+                    const onlineUsers = snapshot.val() || {};
+                    const count = Object.keys(onlineUsers).length;
+                    document.getElementById('onlineCount').textContent = `🟢 ${count} người đang online`;
+                });
+
+            } catch (error) {
+                console.error("Lỗi khởi tạo Firebase:", error);
+                isFirebaseConfigured = false;
+            }
+        }
+
+        function joinChat() {
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                alert('Vui lòng nhập tên của bạn!');
+                return;
+            }
+
+            currentUser = {
+                name: username,
+                id: Date.now().toString(),
+                joinTime: new Date().toISOString()
+            };
+
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('chatMain').style.display = 'flex';
+
+            if (isFirebaseConfigured) {
+                // Đăng ký người dùng online
+                const userRef = onlineUsersRef.child(currentUser.id);
+                userRef.set({
+                    name: username,
+                    joinTime: firebase.database.ServerValue.TIMESTAMP
+                });
+
+                // Xóa người dùng khi offline
+                userRef.onDisconnect().remove();
+
+                // Tải tin nhắn cũ
+                loadOldMessages();
+            } else {
+                // Sử dụng localStorage nếu Firebase không khả dụng
+                loadMessagesFromLocal();
+                document.getElementById('onlineCount').textContent = '🟢 1 người đang online (chỉ bạn)';
+            }
+
+            // Focus vào input
+            document.getElementById('messageInput').focus();
+        }
+
+        function loadOldMessages() {
+            if (!isFirebaseConfigured) return;
+
+            messagesRef.limitToLast(50).once('value', (snapshot) => {
+                const messages = [];
+                snapshot.forEach((child) => {
+                    messages.push(child.val());
+                });
+
+                // Xóa container và hiển thị lại các tin nhắn
+                document.getElementById('messagesContainer').innerHTML = '';
+                messages.forEach(displayMessage);
+            });
+        }
+
+        function loadMessagesFromLocal() {
+            const messages = JSON.parse(localStorage.getItem('pandaChatMessages') || '[]');
+            document.getElementById('messagesContainer').innerHTML = '';
+            messages.slice(-50).forEach(displayMessage); // Chỉ hiển thị 50 tin nhắn gần nhất
+        }
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const text = messageInput.value.trim();
+
+            if (!text || !currentUser) return;
+
+            const message = {
+                id: Date.now().toString(),
+                text: text,
+                username: currentUser.name,
+                userId: currentUser.id,
+                timestamp: new Date().toISOString(),
+                time: new Date().toLocaleTimeString('vi-VN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                })
+            };
+
+            if (isFirebaseConfigured) {
+                // Gửi tin nhắn lên Firebase
+                messagesRef.push(message);
+            } else {
+                // Lưu tin nhắn vào localStorage
+                const messages = JSON.parse(localStorage.getItem('pandaChatMessages') || '[]');
+                messages.push(message);
+                // Chỉ giữ lại 100 tin nhắn gần nhất
+                if (messages.length > 100) {
+                    messages.splice(0, messages.length - 100);
+                }
+                localStorage.setItem('pandaChatMessages', JSON.stringify(messages));
+                displayMessage(message);
+            }
+
+            messageInput.value = '';
+            messageInput.focus();
+        }
+
+        function displayMessage(message) {
+            const messagesContainer = document.getElementById('messagesContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.userId === currentUser?.id ? 'own' : ''}`;
+
+            const avatar = message.username.charAt(0).toUpperCase();
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">
+                    <div class="message-header">
+                        <span class="message-username">${escapeHtml(message.username)}</span>
+                        <span class="message-time">${message.time}</span>
+                    </div>
+                    <div class="message-text">${escapeHtml(message.text)}</div>
+                </div>
+            `;
+
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listeners
+        document.getElementById('usernameInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                joinChat();
+            }
+        });
+
+        document.getElementById('messageInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Khởi tạo ứng dụng
+        window.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+        });
+
+        // Cleanup khi rời khỏi trang
+        window.addEventListener('beforeunload', () => {
+            if (isFirebaseConfigured && currentUser && onlineUsersRef) {
+                onlineUsersRef.child(currentUser.id).remove();
+            }
+        });
+    </script>
+</body>
+
+</html>
